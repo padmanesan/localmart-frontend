@@ -1,0 +1,263 @@
+/* Loading */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  gap: 20px;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #2D6A4F;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Header */
+.shoplist-header {
+  background: linear-gradient(135deg, #2D6A4F 0%, #52B788 100%);
+  padding: 60px 40px;
+  text-align: center;
+  color: white;
+}
+
+.shoplist-header h1 {
+  font-size: 42px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.shoplist-header p {
+  font-size: 16px;
+  opacity: 0.9;
+  margin-bottom: 30px;
+}
+
+.shoplist-search {
+  width: 50%;
+  padding: 15px 25px;
+  border-radius: 50px;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+}
+
+/* Category Filter */
+.category-filter {
+  display: flex;
+  gap: 12px;
+  padding: 30px 40px;
+  overflow-x: auto;
+  background: #F8F4EF;
+}
+
+.filter-btn {
+  padding: 10px 22px;
+  border-radius: 25px;
+  border: 2px solid #2D6A4F;
+  background: white;
+  color: #2D6A4F;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+  background: #2D6A4F;
+  color: white;
+}
+
+.filter-btn.active {
+  background: #2D6A4F;
+  color: white;
+}
+
+/* Shop Grid */
+.shops-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 25px;
+  padding: 40px;
+  background: #F8F4EF;
+}
+
+/* Shop Card */
+.shop-card {
+  background: white;
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.shop-card:hover {
+  box-shadow: 0 10px 30px rgba(45,106,79,0.15);
+}
+
+/* Shop Card Header */
+.shop-card-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.shop-avatar {
+  width: 55px;
+  height: 55px;
+  background: linear-gradient(135deg, #2D6A4F, #52B788);
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.shop-card-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 4px;
+}
+
+.shop-category {
+  background: #F8F4EF;
+  color: #2D6A4F;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Shop Info */
+.shop-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.shop-info p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  font-size: 14px;
+}
+
+/* Rating */
+.shop-rating {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 15px;
+}
+
+.star-icon {
+  color: #D4A574;
+  fill: #D4A574;
+}
+
+.shop-rating span {
+  font-weight: 700;
+  color: #333;
+}
+
+.reviews {
+  color: #999;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+/* Description */
+.shop-description {
+  color: #888;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+/* View Button */
+.view-btn {
+  width: 100%;
+  padding: 12px;
+  background: #2D6A4F;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.view-btn:hover {
+  background: #D4A574;
+  transform: translateY(-2px);
+}
+
+/* No Shops */
+.no-shops {
+  text-align: center;
+  padding: 60px;
+  color: #999;
+  font-size: 18px;
+  grid-column: 1/-1;
+}
+
+/* Dark Mode */
+body.dark .shops-grid {
+  background: #0f3460;
+}
+
+body.dark .shop-card {
+  background: #1a1a2e;
+  color: white;
+}
+
+body.dark .shop-card-header h3 {
+  color: white;
+}
+
+body.dark .category-filter {
+  background: #16213e;
+}
+
+body.dark .filter-btn {
+  background: #1a1a2e;
+  color: white;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .shoplist-header h1 {
+    font-size: 28px;
+  }
+
+  .shoplist-search {
+    width: 90%;
+  }
+
+  .shops-grid {
+    padding: 20px;
+    grid-template-columns: 1fr;
+  }
+
+  .category-filter {
+    padding: 20px;
+  }
+}
