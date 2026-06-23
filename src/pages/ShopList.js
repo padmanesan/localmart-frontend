@@ -3,12 +3,14 @@ import { motion } from 'framer-motion';
 import { FiMapPin, FiPhone, FiStar, FiClock } from 'react-icons/fi';
 import axios from 'axios';
 import './ShopList.css';
+import { useNavigate } from 'react-router-dom';
 
 const ShopList = () => {
   const [shops, setShops] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const navigate = useNavigate();
 
   const categories = ['All', 'Food', 'Wood', 'Medical', 'Electronics', 
                       'Grocery', 'Fashion', 'Bikes', 'Cars', 'Building'];
@@ -119,7 +121,12 @@ const ShopList = () => {
               <p className="shop-description">{shop.description}</p>
 
               {/* Button */}
-              <button className="view-btn">View Shop →</button>
+             <button 
+  className="view-btn"
+  onClick={() => navigate(`/shops/${shop.id}`)}
+>
+  View Shop →
+</button>
             </motion.div>
           ))
         )}
