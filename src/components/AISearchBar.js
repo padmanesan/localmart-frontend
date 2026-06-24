@@ -13,7 +13,8 @@ const AISearchBar = ({ onSearchResults }) => {
 
         setLoading(true);
         try {
-            const backendUrl = 'http://localhost:8080';
+            // Updated directly to point to your live Render environment link
+            const backendUrl = 'https://nesanora-backend.onrender.com';
             const response = await axios.post(`${backendUrl}/api/ai-search`, { query });
             onSearchResults(response.data.results);
         } catch (error) {
