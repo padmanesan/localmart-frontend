@@ -42,6 +42,11 @@ const Home = () => {
   const [location, setLocation] = useState('');
   const navigate = useNavigate();
 
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    navigate(`/shops?city=${encodeURIComponent(location)}&query=${encodeURIComponent(search)}`);
+  };
+
   return (
     <div className="home">
 
@@ -60,8 +65,8 @@ const Home = () => {
           Find the best local shops in your city — food, wood, medical, electronics and more!
         </p>
 
-        {/* Search Box */}
-        <div className="hero-search">
+        {/* Search Form Wrapper */}
+        <form className="hero-search" onSubmit={handleSearchSubmit}>
           <div className="search-input-group">
             <FiMapPin className="input-icon" />
             <input
@@ -81,13 +86,10 @@ const Home = () => {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <button
-            className="search-btn"
-            onClick={() => navigate(`/shops?city=${location}&query=${search}`)}
-          >
+          <button type="submit" className="search-btn">
             Search
           </button>
-        </div>
+        </form>
       </motion.div>
 
       {/* Categories Section */}
@@ -105,7 +107,7 @@ const Home = () => {
               className="category-card"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => navigate(`/shops?category=${cat.name}`)}
+              onClick={() => navigate(`/shops?category=${encodeURIComponent(cat.name)}`)}
             >
               <img
                 src={cat.image}

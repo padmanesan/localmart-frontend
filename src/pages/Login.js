@@ -23,7 +23,8 @@ const Login = () => {
     setStep(2);
   };
 
-  const handleLogin = () => {
+  const handleLogin = (e) => {
+    e.preventDefault(); // Prevents page refresh
     localStorage.setItem('role', role);
     localStorage.setItem('user', JSON.stringify(form));
     if (role === 'seller') {
@@ -42,7 +43,7 @@ const Login = () => {
         transition={{ duration: 0.6 }}
       >
         {/* Logo */}
-        <div className="login-logo">
+        <div className="login-logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
           <span className="logo-nesan">Nesan</span>
           <span className="logo-ora">ora</span>
         </div>
@@ -85,10 +86,11 @@ const Login = () => {
 
         {/* Step 2 - Login Form */}
         {step === 2 && (
-          <motion.div
+          <motion.form
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="login-form"
+            onSubmit={handleLogin}
           >
             <h2>{role === 'buyer' ? 'Buyer Login' : 'Seller Login'}</h2>
             <p>Welcome back! Please enter your details</p>
@@ -96,20 +98,24 @@ const Login = () => {
             <div className="form-group">
               <label>Full Name</label>
               <input
+                type="text"
                 name="name"
                 value={form.name}
                 onChange={handleChange}
                 placeholder="Your full name"
+                required
               />
             </div>
 
             <div className="form-group">
               <label>Email</label>
               <input
+                type="email"
                 name="email"
                 value={form.email}
                 onChange={handleChange}
                 placeholder="your@email.com"
+                required
               />
             </div>
 
@@ -121,34 +127,39 @@ const Login = () => {
                 value={form.password}
                 onChange={handleChange}
                 placeholder="Enter password"
+                required
               />
             </div>
 
             <div className="form-group">
               <label>Phone Number</label>
               <input
+                type="tel"
                 name="phone"
                 value={form.phone}
                 onChange={handleChange}
                 placeholder="10 digit mobile number"
+                pattern="[0-9]{10}"
+                required
               />
             </div>
 
             <div className="login-buttons">
               <button
+                type="button"
                 className="back-btn"
                 onClick={() => setStep(1)}
               >
                 Back
               </button>
               <button
+                type="submit"
                 className="login-btn"
-                onClick={handleLogin}
               >
                 {role === 'buyer' ? 'Find Shops' : 'Register Shop'}
               </button>
             </div>
-          </motion.div>
+          </motion.form>
         )}
       </motion.div>
     </div>

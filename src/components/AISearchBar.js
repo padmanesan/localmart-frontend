@@ -13,7 +13,6 @@ const AISearchBar = ({ onSearchResults }) => {
 
         setLoading(true);
         try {
-            // Updated directly to point to your live Render environment link
             const backendUrl = 'https://nesanora-backend.onrender.com';
             const response = await axios.post(`${backendUrl}/api/ai-search`, { query });
             onSearchResults(response.data.results);
@@ -39,7 +38,7 @@ const AISearchBar = ({ onSearchResults }) => {
                             padding: '12px 20px',
                             paddingLeft: '45px',
                             borderRadius: '30px',
-                            border: '1px solid #ccc',
+                            border: '2px solid #1E3A8A', 
                             fontSize: '16px',
                             outline: 'none',
                             boxSizing: 'border-box'
@@ -55,7 +54,7 @@ const AISearchBar = ({ onSearchResults }) => {
                     style={{
                         padding: '12px 25px',
                         borderRadius: '30px',
-                        backgroundColor: '#1A73E8',
+                        backgroundColor: '#1E3A8A',
                         color: '#fff',
                         border: 'none',
                         cursor: 'pointer',

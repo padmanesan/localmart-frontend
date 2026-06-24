@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FiMapPin, FiPhone, FiClock, FiStar, FiArrowLeft } from 'react-icons/fi';
@@ -11,20 +11,22 @@ const ShopDetail = () => {
   const [shop, setShop] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchShop();
-  }, []);
-
-  const fetchShop = async () => {
+  const fetchShop = useCallback(async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/shops/${id}`);
-      setShop(response.data);
+      // Fetching all shops to look up the specific one matching the ID parameter
+      const response = await axios.get('https://nesanora-backend.onrender.com/api/shops/all');
+      const foundShop = response.data.find(s => String(s.id) === String(id));
+      setShop(foundShop || null);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching shop:', error);
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    fetchShop();
+  }, [fetchShop]);
 
   if (loading) {
     return (
@@ -63,13 +65,13 @@ const ShopDetail = () => {
         {/* Shop Header */}
         <div className="shop-detail-header">
           <div className="shop-detail-avatar">
-            {shop.name.charAt(0)}
+            {shop.name ? shop.name.charAt(0) : 'S'}
           </div>
           <div className="shop-detail-info">
             <h1>{shop.name}</h1>
             <div className="shop-detail-badges">
-              <span className="badge main-category">{shop.mainCategory}</span>
-              <span className="badge sub-category">{shop.subCategory}</span>
+              <span className="badge main-category">{shop.mainCategory || shop.category}</span>
+              <span className="badge sub-category">{shop.subCategory || 'General'}</span>
             </div>
             <div className="shop-detail-rating">
               <FiStar className="star-icon" />
@@ -81,7 +83,6 @@ const ShopDetail = () => {
 
         {/* Shop Details Grid */}
         <div className="shop-detail-grid">
-
           {/* Contact Info */}
           <div className="detail-card">
             <h3>Contact Information</h3>
@@ -89,16 +90,16 @@ const ShopDetail = () => {
               <FiPhone className="detail-icon" />
               <div>
                 <label>Phone</label>
-                <p>{shop.phone}</p>
+                <p>{shop.phone || 'No phone verified'}</p>
               </div>
             </div>
             <div className="detail-item">
               <FiMapPin className="detail-icon" />
               <div>
                 <label>Address</label>
-                <p>{shop.address}</p>
-                <p>{shop.city}, {shop.district}</p>
-                <p>{shop.state} - {shop.pincode}</p>
+                <p>{shop.address || 'Address not provided'}</p>
+                <p>{shop.city || ''}, {shop.district || ''}</p>
+                <p>{shop.state || ''} {shop.pincode ? `- ${shop.pincode}` : ''}</p>
               </div>
             </div>
             <div className="detail-item">
@@ -113,36 +114,33 @@ const ShopDetail = () => {
           {/* About Shop */}
           <div className="detail-card">
             <h3>About Shop</h3>
-            <p className="shop-description-full">{shop.description}</p>
+            <p className="shop-description-full">{shop.description || 'No description provided for this storefront.'}</p>
             <div className="owner-info">
               <div className="owner-avatar">
-                {shop.ownerName.charAt(0)}
+                {shop.ownerName ? shop.ownerName.charAt(0) : 'O'}
               </div>
               <div>
                 <label>Shop Owner</label>
-                <p>{shop.ownerName}</p>
+                <p>{shop.ownerName || 'Independent Seller'}</p>
               </div>
             </div>
           </div>
-
         </div>
 
-       {/* Action Buttons */}
-       {/* Action Buttons */}
-<div className="shop-actions">
-  <a href={`tel:${shop.phone}`} className="action-btn call-btn">
-    <FiPhone /> Call Now
-  </a>
-  
-    href={`https://maps.google.com/?q=${shop.address},${shop.city}`}
-    target="_blank"
-    rel="noreferrer"
-    className="action-btn directions-btn"
-  <a>
-    <FiMapPin /> Get Directions
-  </a>
-</div>
-
+        {/* Action Buttons */}
+        <div className="shop-actions">
+          <a href={`tel:${shop.phone}`} className="action-btn call-btn">
+            <FiPhone /> Call Now
+          </a>
+          <a 
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${shop.name} ${shop.address || ''} ${shop.city || ''}`)}`}
+            target="_blank"
+            rel="noreferrer"
+            className="action-btn directions-btn"
+          >
+            <FiMapPin /> Get Directions
+          </a>
+        </div>
       </motion.div>
     </div>
   );

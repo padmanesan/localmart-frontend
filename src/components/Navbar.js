@@ -6,11 +6,19 @@ import './Navbar.css';
 const Navbar = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [navSearch, setNavSearch] = useState('');
   const navigate = useNavigate();
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
     document.body.classList.toggle('dark');
+  };
+
+  const handleNavSearchSubmit = (e) => {
+    e.preventDefault();
+    if (!navSearch.trim()) return;
+    // Reroutes user directly to shops layout with search inputs in scope
+    navigate(`/shops?search=${encodeURIComponent(navSearch)}`);
   };
 
   return (
@@ -22,13 +30,15 @@ const Navbar = () => {
       </div>
 
       {/* Search Bar */}
-      <div className="navbar-search">
-        <FiSearch className="search-icon" />
+      <form className="navbar-search" onSubmit={handleNavSearchSubmit}>
+        <FiSearch className="search-icon" onClick={handleNavSearchSubmit} style={{ cursor: 'pointer' }} />
         <input
           type="text"
           placeholder="Search shops, products..."
+          value={navSearch}
+          onChange={(e) => setNavSearch(e.target.value)}
         />
-      </div>
+      </form>
 
       {/* Nav Links */}
       <ul className={`navbar-links ${menuOpen ? 'open' : ''}`}>
@@ -44,11 +54,11 @@ const Navbar = () => {
           {darkMode ? <FiSun /> : <FiMoon />}
         </button>
         <button className="login-btn-nav" onClick={() => navigate('/login')}>
-  Login
-</button>
-<button className="register-btn" onClick={() => navigate('/register')}>
-  Register Shop
-</button>
+          Login
+        </button>
+        <button className="register-btn" onClick={() => navigate('/register')}>
+          Register Shop
+        </button>
         <button className="menu-btn" onClick={() => setMenuOpen(!menuOpen)}>
           {menuOpen ? <FiX /> : <FiMenu />}
         </button>

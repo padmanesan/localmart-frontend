@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { FiMapPin, FiPhone, FiStar, FiClock, FiSearch } from 'react-icons/fi';
 import { IoSparkles } from 'react-icons/io5';
 import axios from 'axios';
 import './ShopList.css';
 import { useNavigate } from 'react-router-dom';
+
+const BACKEND_URL = 'https://nesanora-backend.onrender.com';
 
 const ShopList = () => {
   const [shops, setShops] = useState([]);
@@ -18,15 +20,7 @@ const ShopList = () => {
   const categories = ['All', 'Food', 'Wood', 'Medical', 'Electronics', 
                       'Grocery', 'Fashion', 'Bikes', 'Cars', 'Building'];
 
-  // Base URL shifts dynamically between your local environment and live Railway production
- // Change this line from localhost to:
-await axios.get('https://nesanora-backend.onrender.com/api/shops/all');
-
-  useEffect(() => {
-    fetchShops();
-  }, []);
-
-  const fetchShops = async () => {
+  const fetchShops = useCallback(async () => {
     try {
       const response = await axios.get(`${BACKEND_URL}/api/shops/all`);
       setShops(response.data);
@@ -35,9 +29,12 @@ await axios.get('https://nesanora-backend.onrender.com/api/shops/all');
       console.error('Error fetching shops:', error);
       setLoading(false);
     }
-  };
+  }, []);
 
-  // Handles the AI recommendation query execution
+  useEffect(() => {
+    fetchShops();
+  }, [fetchShops]);
+
   const handleAISearch = async (e) => {
     e.preventDefault();
     if (!aiQuery.trim()) return;
@@ -47,7 +44,7 @@ await axios.get('https://nesanora-backend.onrender.com/api/shops/all');
       const response = await axios.post(`${BACKEND_URL}/api/ai-search`, { query: aiQuery });
       if (response.data && response.data.results) {
         setShops(response.data.results);
-        setSelectedCategory('All'); // Reset category filters to show custom matches
+        setSelectedCategory('All'); 
       }
     } catch (error) {
       console.error("AI Search Error:", error);
@@ -57,12 +54,14 @@ await axios.get('https://nesanora-backend.onrender.com/api/shops/all');
     }
   };
 
-  // Soft client-side text filtering logic for the standard text input element
   const filteredShops = shops.filter(shop => {
-    const matchSearch = shop.name.toLowerCase().includes(search.toLowerCase()) || 
+    const matchSearch = (shop.name && shop.name.toLowerCase().includes(search.toLowerCase())) || 
                         (shop.description && shop.description.toLowerCase().includes(search.toLowerCase()));
+    
+    // Check both potential properties for matching category logic safely
+    const shopCat = shop.category || shop.mainCategory || '';
     const matchCategory = selectedCategory === 'All' || 
-                          (shop.category && shop.category.toLowerCase().includes(selectedCategory.toLowerCase()));
+                          shopCat.toLowerCase().includes(selectedCategory.toLowerCase());
     return matchSearch && matchCategory;
   });
 
@@ -77,12 +76,10 @@ await axios.get('https://nesanora-backend.onrender.com/api/shops/all');
 
   return (
     <div className="shoplist">
-      {/* Header */}
       <div className="shoplist-header">
         <h1>Local Shops Near You</h1>
         <p>Discover the best local shops in your area</p>
 
-        {/* Gemini AI Search Input Wrapper */}
         <div style={{ maxWidth: '600px', margin: '20px auto', padding: '0 10px' }}>
           <form onSubmit={handleAISearch} style={{ display: 'flex', gap: '10px' }}>
             <div style={{ position: 'relative', flex: 1 }}>
@@ -96,7 +93,7 @@ await axios.get('https://nesanora-backend.onrender.com/api/shops/all');
                   padding: '14px 20px',
                   paddingLeft: '45px',
                   borderRadius: '30px',
-                  border: '2px solid #1E3A8A', // Sleek high-contrast ink blue border style
+                  border: '2px solid #1E3A8A', 
                   fontSize: '15px',
                   outline: 'none',
                   boxSizing: 'border-box'
@@ -135,7 +132,6 @@ await axios.get('https://nesanora-backend.onrender.com/api/shops/all');
 
         <div style={{ margin: '15px 0', opacity: 0.5 }}>— OR —</div>
 
-        {/* Standard Local Live Client Search */}
         <div style={{ position: 'relative', maxWidth: '400px', margin: '0 auto' }}>
           <input
             type="text"
@@ -149,7 +145,6 @@ await axios.get('https://nesanora-backend.onrender.com/api/shops/all');
         </div>
       </div>
 
-      {/* Category Filter */}
       <div className="category-filter">
         {categories.map((cat, index) => (
           <button
@@ -162,51 +157,45 @@ await axios.get('https://nesanora-backend.onrender.com/api/shops/all');
         ))}
       </div>
 
-      {/* Shop Cards Grid Layout */}
       <div className="shops-grid">
         {filteredShops.length === 0 ? (
           <div className="no-shops">
-            <p>No shops found matching filters! 😔</p>
+            <p>No shops found matching filters! </p>
           </div>
         ) : (
           filteredShops.map((shop, index) => (
             <motion.div
-              key={shop.id}
+              key={shop.id || index}
               className="shop-card"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
               whileHover={{ y: -5 }}
             >
-              {/* Shop Header */}
               <div className="shop-card-header">
                 <div className="shop-avatar">
                   {shop.name ? shop.name.charAt(0) : 'S'}
                 </div>
                 <div>
                   <h3>{shop.name}</h3>
-                  <span className="shop-category">{shop.category}</span>
+                  <span className="shop-category">{shop.category || shop.mainCategory}</span>
                 </div>
               </div>
 
-              {/* Shop Details */}
               <div className="shop-info">
                 <p><FiMapPin /> {shop.address || 'Address not provided'}</p>
                 <p><FiPhone /> {shop.phone || 'No phone verified'}</p>
                 <p><FiClock /> {shop.openTime || '9:00 AM'} - {shop.closeTime || '9:00 PM'}</p>
               </div>
 
-              {/* Rating Section */}
               <div className="shop-rating">
                 <FiStar className="star-icon" />
                 <span>{shop.rating || '4.5'}</span>
                 <span className="reviews">({shop.totalReviews || '12'} reviews)</span>
               </div>
 
-              {/* Description */}
               <p className="shop-description">{shop.description || 'No description provided for this storefront.'}</p>
 
-              {/* Action Button */}
               <button 
                 className="view-btn"
                 onClick={() => navigate(`/shops/${shop.id}`)}
