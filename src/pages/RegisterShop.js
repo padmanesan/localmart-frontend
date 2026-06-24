@@ -48,12 +48,13 @@ const RegisterShop = () => {
 
   const handleSubmit = async () => {
     try {
-      await axios.post('http://localhost:8080/api/shops/register', form);
-      setSuccess(true);
-      setTimeout(() => navigate('/shops'), 2000);
-    } catch (error) {
-      console.error('Error registering shop:', error);
-    }
+     // Add https:// right here:
+await axios.post('https://nesanora-backend.onrender.com/api/shops/register', form);
+setSuccess(true);
+setTimeout(() => navigate('/shops'), 2000);
+} catch (error) {
+  console.error('Error registering shop:', error);
+}
   };
 
   if (success) {
