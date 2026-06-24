@@ -13,7 +13,7 @@ const AISearchBar = ({ onSearchResults }) => {
 
         setLoading(true);
         try {
-            const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+            const backendUrl = 'http://localhost:8080';
             const response = await axios.post(`${backendUrl}/api/ai-search`, { query });
             onSearchResults(response.data.results);
         } catch (error) {
