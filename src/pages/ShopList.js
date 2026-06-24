@@ -19,7 +19,8 @@ const ShopList = () => {
                       'Grocery', 'Fashion', 'Bikes', 'Cars', 'Building'];
 
   // Base URL shifts dynamically between your local environment and live Railway production
-  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8080';
+ // Change this line from localhost to:
+await axios.get('https://nesanora-backend.onrender.com/api/shops/all');
 
   useEffect(() => {
     fetchShops();
