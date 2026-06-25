@@ -15,16 +15,40 @@ const ShopList = () => {
   const [aiQuery, setAiQuery] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [userCoords, setUserCoords] = useState(null);
   const navigate = useNavigate();
 
   const categories = ['All', 'Food', 'Wood', 'Medical', 'Electronics', 
                       'Grocery', 'Fashion', 'Bikes', 'Cars', 'Building'];
 
+  // Requests browser latitude & longitude to sort listings dynamically
   const fetchShops = useCallback(async () => {
     try {
-      const response = await axios.get(`${BACKEND_URL}/api/shops/all`);
-      setShops(response.data);
-      setLoading(false);
+      setLoading(true);
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            setUserCoords({ lat, lng });
+
+            // Request from proximity sorting route
+            const response = await axios.get(`${BACKEND_URL}/api/shops/nearby?lat=${lat}&lng=${lng}`);
+            setShops(response.data);
+            setLoading(false);
+          },
+          async (error) => {
+            console.warn("Location permission denied. Pulling generic list.", error);
+            const response = await axios.get(`${BACKEND_URL}/api/shops/all`);
+            setShops(response.data);
+            setLoading(false);
+          }
+        );
+      } else {
+        const response = await axios.get(`${BACKEND_URL}/api/shops/all`);
+        setShops(response.data);
+        setLoading(false);
+      }
     } catch (error) {
       console.error('Error fetching shops:', error);
       setLoading(false);
@@ -35,20 +59,25 @@ const ShopList = () => {
     fetchShops();
   }, [fetchShops]);
 
+  // AI Search processing engine
   const handleAISearch = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!aiQuery.trim()) return;
 
     setAiLoading(true);
     try {
       const response = await axios.post(`${BACKEND_URL}/api/ai-search`, { query: aiQuery });
-      if (response.data && response.data.results) {
+      
+      // FIX: Payload data is returned directly as the root array from your backend!
+      if (response.data && Array.isArray(response.data)) {
+        setShops(response.data);
+      } else if (response.data && response.data.results) {
         setShops(response.data.results);
-        setSelectedCategory('All'); 
       }
+      setSelectedCategory('All'); 
     } catch (error) {
       console.error("AI Search Error:", error);
-      alert("Could not connect to Gemini AI backend. Making regular lookup instead.");
+      alert("Could not complete AI query request. Reverting to standard database view.");
     } finally {
       setAiLoading(false);
     }
@@ -58,7 +87,6 @@ const ShopList = () => {
     const matchSearch = (shop.name && shop.name.toLowerCase().includes(search.toLowerCase())) || 
                         (shop.description && shop.description.toLowerCase().includes(search.toLowerCase()));
     
-    // Check both potential properties for matching category logic safely
     const shopCat = shop.category || shop.mainCategory || '';
     const matchCategory = selectedCategory === 'All' || 
                           shopCat.toLowerCase().includes(selectedCategory.toLowerCase());
@@ -69,7 +97,7 @@ const ShopList = () => {
     return (
       <div className="loading">
         <div className="spinner"></div>
-        <p>Finding shops near you...</p>
+        <p>Finding local shops near you...</p>
       </div>
     );
   }
@@ -80,6 +108,7 @@ const ShopList = () => {
         <h1>Local Shops Near You</h1>
         <p>Discover the best local shops in your area</p>
 
+        {/* AI Query Search Module */}
         <div style={{ maxWidth: '600px', margin: '20px auto', padding: '0 10px' }}>
           <form onSubmit={handleAISearch} style={{ display: 'flex', gap: '10px' }}>
             <div style={{ position: 'relative', flex: 1 }}>
@@ -87,7 +116,7 @@ const ShopList = () => {
                 type="text"
                 value={aiQuery}
                 onChange={(e) => setAiQuery(e.target.value)}
-                placeholder="✨ Ask Gemini AI... (e.g., 'places that sell wooden tables')"
+                placeholder="✨ Ask Gemini AI... (e.g., 'places that sell hot biriyani')"
                 style={{
                   width: '100%',
                   padding: '14px 20px',
@@ -145,6 +174,7 @@ const ShopList = () => {
         </div>
       </div>
 
+      {/* Category Tabs Layout */}
       <div className="category-filter">
         {categories.map((cat, index) => (
           <button
@@ -157,10 +187,11 @@ const ShopList = () => {
         ))}
       </div>
 
+      {/* Grid Elements */}
       <div className="shops-grid">
         {filteredShops.length === 0 ? (
           <div className="no-shops">
-            <p>No shops found matching filters! </p>
+            <p>No shops found matching your search parameter criteria!</p>
           </div>
         ) : (
           filteredShops.map((shop, index) => (

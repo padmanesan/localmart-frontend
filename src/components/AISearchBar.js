@@ -6,7 +6,7 @@ import { IoSparkles } from 'react-icons/io5';
 const AISearchBar = ({ onSearchResults }) => {
     const [query, setQuery] = useState('');
     const [loading, setLoading] = useState(false);
-    const [feedbackMessage, setFeedbackMessage] = useState(''); // Stores rate limit alerts
+    const [feedbackMessage, setFeedbackMessage] = useState(''); // Stores rate limit/error alerts
 
     const handleSearch = async (e) => {
         e.preventDefault();
@@ -19,12 +19,19 @@ const AISearchBar = ({ onSearchResults }) => {
             const backendUrl = 'https://nesanora-backend.onrender.com';
             const response = await axios.post(`${backendUrl}/api/ai-search`, { query });
             
-            // Check if backend intercepted a Gemini rate limit (Task A protection)
+            // 1. Check if backend intercepted a Gemini rate limit object
             if (response.data && response.data.isRateLimited) {
                 setFeedbackMessage(response.data.message);
                 onSearchResults([]); // Clear grid if rate limited
-            } else {
-                onSearchResults(response.data.results);
+            } 
+            // 2. Process the straight shop list array directly from your updated controller
+            else if (response.data) {
+                const dataList = Array.isArray(response.data) ? response.data : response.data.results || [];
+                onSearchResults(dataList);
+                
+                if (dataList.length === 0) {
+                    setFeedbackMessage("No shops match that description. Try searching something else!");
+                }
             }
         } catch (error) {
             console.error("AI Search Error:", error);
@@ -42,7 +49,7 @@ const AISearchBar = ({ onSearchResults }) => {
                         type="text"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
-                        placeholder="vintage clothes or open cafes"
+                        placeholder="✨ Search with AI... (e.g., 'places that sell hot biriyani')"
                         disabled={loading}
                         style={{
                             width: '100%',
@@ -78,7 +85,7 @@ const AISearchBar = ({ onSearchResults }) => {
                 </motion.button>
             </form>
 
-            {/* TASK B: SMOOTH ANIMATED LOADING SPINNER */}
+            {/* SMOOTH ANIMATED LOADING SPINNER */}
             {loading && (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '20px' }}>
                     <motion.div
@@ -93,12 +100,12 @@ const AISearchBar = ({ onSearchResults }) => {
                         }}
                     />
                     <p style={{ marginTop: '10px', color: '#1E3A8A', fontSize: '14px', fontWeight: '500' }}>
-                        Gemini AI is analyzing local shop catalogs...
+                        Searching matching catalog items...
                     </p>
                 </div>
             )}
 
-            {/* DISPLAY RATE-LIMIT MESSAGES INSTEAD OF CRASHING */}
+            {/* DISPLAY ERROR OR RATE-LIMIT MESSAGES */}
             {feedbackMessage && !loading && (
                 <div style={{ textAlign: 'center', marginTop: '15px', color: '#DC2626', fontSize: '14px', fontWeight: '500' }}>
                     {feedbackMessage}
