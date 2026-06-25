@@ -6,19 +6,29 @@ import { IoSparkles } from 'react-icons/io5';
 const AISearchBar = ({ onSearchResults }) => {
     const [query, setQuery] = useState('');
     const [loading, setLoading] = useState(false);
+    const [feedbackMessage, setFeedbackMessage] = useState(''); // Stores rate limit alerts
 
     const handleSearch = async (e) => {
         e.preventDefault();
         if (!query.trim()) return;
 
         setLoading(true);
+        setFeedbackMessage(''); // Clear any previous warning messages
+        
         try {
             const backendUrl = 'https://nesanora-backend.onrender.com';
             const response = await axios.post(`${backendUrl}/api/ai-search`, { query });
-            onSearchResults(response.data.results);
+            
+            // Check if backend intercepted a Gemini rate limit (Task A protection)
+            if (response.data && response.data.isRateLimited) {
+                setFeedbackMessage(response.data.message);
+                onSearchResults([]); // Clear grid if rate limited
+            } else {
+                onSearchResults(response.data.results);
+            }
         } catch (error) {
             console.error("AI Search Error:", error);
-            alert("Something went wrong with the AI search connection.");
+            setFeedbackMessage("Something went wrong with the AI search connection.");
         } finally {
             setLoading(false);
         }
@@ -32,7 +42,8 @@ const AISearchBar = ({ onSearchResults }) => {
                         type="text"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
-                        placeholder="✨ Ask Gemini AI... (e.g., 'vintage clothes or open cafes')"
+                        placeholder="vintage clothes or open cafes"
+                        disabled={loading}
                         style={{
                             width: '100%',
                             padding: '12px 20px',
@@ -41,29 +52,58 @@ const AISearchBar = ({ onSearchResults }) => {
                             border: '2px solid #1E3A8A', 
                             fontSize: '16px',
                             outline: 'none',
-                            boxSizing: 'border-box'
+                            boxSizing: 'border-box',
+                            backgroundColor: loading ? '#f3f4f6' : '#fff'
                         }}
                     />
                     <IoSparkles style={{ position: 'absolute', left: '18px', top: '50%', transform: 'translateY(-50%)', color: '#1A73E8' }} />
                 </div>
                 <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={!loading ? { scale: 1.05 } : {}}
+                    whileTap={!loading ? { scale: 0.95 } : {}}
                     type="submit"
                     disabled={loading}
                     style={{
                         padding: '12px 25px',
                         borderRadius: '30px',
-                        backgroundColor: '#1E3A8A',
+                        backgroundColor: loading ? '#6B7280' : '#1E3A8A',
                         color: '#fff',
                         border: 'none',
-                        cursor: 'pointer',
-                        fontWeight: 'bold'
+                        cursor: loading ? 'not-allowed' : 'pointer',
+                        fontWeight: 'bold',
+                        transition: 'background-color 0.3s ease'
                     }}
                 >
                     {loading ? 'Analyzing...' : 'AI Search'}
                 </motion.button>
             </form>
+
+            {/* TASK B: SMOOTH ANIMATED LOADING SPINNER */}
+            {loading && (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '20px' }}>
+                    <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+                        style={{
+                            width: '30px',
+                            height: '30px',
+                            border: '4px solid rgba(30, 58, 138, 0.1)',
+                            borderTop: '4px solid #1E3A8A',
+                            borderRadius: '50%'
+                        }}
+                    />
+                    <p style={{ marginTop: '10px', color: '#1E3A8A', fontSize: '14px', fontWeight: '500' }}>
+                        Gemini AI is analyzing local shop catalogs...
+                    </p>
+                </div>
+            )}
+
+            {/* DISPLAY RATE-LIMIT MESSAGES INSTEAD OF CRASHING */}
+            {feedbackMessage && !loading && (
+                <div style={{ textAlign: 'center', marginTop: '15px', color: '#DC2626', fontSize: '14px', fontWeight: '500' }}>
+                    {feedbackMessage}
+                </div>
+            )}
         </div>
     );
 };
